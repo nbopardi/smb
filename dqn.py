@@ -227,12 +227,12 @@ def learn(env,
         
         # YOUR CODE HERE
         # print '-------------------CODE 2---------------'
-        # print last_obs.shape
-        # print list(last_obs.shape)
-        # print np.array([replay_buffer_size] + list(last_obs.shape)).shape
-        # print len([replay_buffer_size] + list(last_obs.shape))
-        # test = np.zeros([replay_buffer_size] + list(last_obs.shape))
-        # print test
+        print last_obs.shape
+        print list(last_obs.shape)
+        print np.array([replay_buffer_size] + list(last_obs.shape)).shape
+        print len([replay_buffer_size] + list(last_obs.shape))
+        test = np.zeros([replay_buffer_size] + list(last_obs.shape))
+        print test
         obs_idx = replay_buffer.store_frame(last_obs)
 
         if np.random.random_sample() < exploration.value(t) or not model_initialized:
