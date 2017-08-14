@@ -23,11 +23,14 @@ print env.action_space.shape
 for _ in xrange(5):
 	action = env.action_space.sample()
 	print action
-	time.sleep(1)
+	# time.sleep(1)
 	obs, rew, done, info = env.step(action)
+	if done:
+		break
 	# env.render()
 env._close()
-env.reset()
+reset_obs = env.reset()
+print type(reset_obs)
 action = env.action_space.sample()
 env.step(action)
 # env.render()

@@ -7,6 +7,7 @@ import tensorflow                as tf
 import tensorflow.contrib.layers as layers
 from collections import namedtuple
 from dqn_utils import *
+import time
 
 OptimizerSpec = namedtuple("OptimizerSpec", ["constructor", "kwargs", "lr_schedule"])
 
@@ -227,12 +228,17 @@ def learn(env,
         
         # YOUR CODE HERE
         # print '-------------------CODE 2---------------'
-        print last_obs.shape
-        print list(last_obs.shape)
-        print np.array([replay_buffer_size] + list(last_obs.shape)).shape
-        print len([replay_buffer_size] + list(last_obs.shape))
-        test = np.zeros([replay_buffer_size] + list(last_obs.shape))
-        print test
+        # print last_obs.shape
+        # print list(last_obs.shape)
+        # print np.array([replay_buffer_size] + list(last_obs.shape)).shape
+        # print len([replay_buffer_size] + list(last_obs.shape))
+        # test = np.zeros([replay_buffer_size] + list(last_obs.shape))
+        # print test
+        # print [replay_buffer_size]
+        # print list(last_obs.shape)
+        # print [replay_buffer_size] + list(last_obs.shape)
+        # if not last_obs is None: 
+
         obs_idx = replay_buffer.store_frame(last_obs)
 
         if np.random.random_sample() < exploration.value(t) or not model_initialized:
@@ -252,10 +258,16 @@ def learn(env,
             action = predict_action(replay_obs[None, :])
 
         last_obs, reward, done, info = env.step(action)
+        print 'timestep', t
 
+        for key in info:
+            print 'key', key
+            print 'val for key ', key, 'is', info[key]
         if done:
+            print 'Done is True'
             env._close()
             last_obs = env.reset()
+            print type(last_obs)
 
         replay_buffer.store_effect(obs_idx, action, reward, done)
 
@@ -348,7 +360,7 @@ def learn(env,
                 num_param_updates += 1
                 print("Target network parameter update {}".format(num_param_updates))
                 
-                model_name = 'GAME_model'
+                model_name = 'SMB_model'
                 saver.save(session, model_name, global_step = num_param_updates, write_meta_graph = True)
                 print model_name + ' ' + str(num_param_updates) + ' saved'
 
