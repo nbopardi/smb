@@ -78,8 +78,8 @@ def smb_learn(env,
         stopping_criterion=stopping_criterion,
         replay_buffer_size=150000, #1000000
         batch_size=32,
-        gamma=0.90, # .99
-        learning_starts=20000, # 50000
+        gamma=0.99, # 0.99
+        learning_starts=30000, # 50000
         learning_freq=4,
         frame_history_len=4,
         target_update_freq=10000,

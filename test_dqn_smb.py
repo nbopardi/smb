@@ -150,6 +150,8 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
 
         # viewer = rendering.SimpleImageViewer()
         random_action_counter = 0
+        repeat_action_timer = 0
+        last_action = 0
         while not done:
 
             obs_idx = replay_buffer.store_frame(last_obs)
@@ -158,17 +160,24 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
             replay_obs = replay_obs.reshape(1,replay_obs.shape[0],replay_obs.shape[1],replay_obs.shape[2])
             # print replay_obs.shape
             # action = predict_action(replay_obs)
-            if random_action_counter < 1:
+            if random_action_counter < 3:
                 action = env.action_space.sample()
                 print action
                 last_obs, reward, done, info = env.step(action)
 
             else:
-                action = sess.run([action_predict], feed_dict = {obs_t_ph: replay_obs})[0]
+                if repeat_action_timer >= 8:
+
+                    repeat_action_timer = 0
+                    action = sess.run([action_predict], feed_dict = {obs_t_ph: replay_obs})[0]
+                    last_action = action
+                else:
+
+                    repeat_action_timer += 1
+                    action = last_action
+                
                 print action
                 last_obs, reward, done, info = env.step(action[0])
-
-            print action
             
             # time.sleep(0.03)
             # rgb = env.render('rgb_array')
@@ -207,14 +216,14 @@ def main():
     # task = benchmark.tasks[3]
     task = 'SuperMarioBros-1-1-v0'
     # Run training
-    seed = 1 # Use a seed of zero (you may want to randomize the seed!)
+    seed = 0 # Use a seed of zero (you may want to randomize the seed!)
     env = get_env(task, seed)
     # print type(env.action_space)
     session = get_session()
     tf.reset_default_graph()
 
     # smb_learn(env, session, num_timesteps=9999999)
-    test_model('SMB_model-93', env)
+    test_model('SMB_model-28', env)
 
 if __name__ == "__main__":
     main()
