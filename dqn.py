@@ -189,6 +189,9 @@ def learn(env,
     last_obs = env.reset()
     LOG_EVERY_N_STEPS = 10000
 
+    repeat_action_timer = 0
+    last_action = 0
+
     for t in itertools.count():
         ### 1. Check stopping criterion
         if stopping_criterion is not None and stopping_criterion(env, t):
@@ -241,28 +244,38 @@ def learn(env,
 
         obs_idx = replay_buffer.store_frame(last_obs)
 
-        if np.random.random_sample() < exploration.value(t) or not model_initialized:
+        if repeat_action_timer >= 8: # repeat the same action for 8 frames (timesteps)
 
-            action = env.action_space.sample()
+            repeat_action_timer = 0 # reset repeat action timer
+
+            if np.random.random_sample() < exploration.value(t) or not model_initialized:
+
+                action = env.action_space.sample()
+            else:
+                replay_obs = replay_buffer.encode_recent_observation()
+                # print replay_obs.shape
+                # print replay_obs[0].shape
+                # replay_obs = np.reshape(replay_obs, (1,84,84,4))
+                # print type(replay_obs)
+                # print replay_obs[0]
+                # print type(replay_obs)
+                # print replay_obs.shape
+                # assert replay_obs.shape == (1,84,84,4)
+                # act_val = session.run([current_qfunc], feed_dict = {obs_t_ph: [replay_obs]})
+                action = predict_action(replay_obs[None, :])
+            last_action = action
         else:
-            replay_obs = replay_buffer.encode_recent_observation()
-            # print replay_obs.shape
-            # print replay_obs[0].shape
-            # replay_obs = np.reshape(replay_obs, (1,84,84,4))
-            # print type(replay_obs)
-            # print replay_obs[0]
-            # print type(replay_obs)
-            # print replay_obs.shape
-            # assert replay_obs.shape == (1,84,84,4)
-            # act_val = session.run([current_qfunc], feed_dict = {obs_t_ph: [replay_obs]})
-            action = predict_action(replay_obs[None, :])
+            repeat_action_timer += 1
+            action = last_action
+
+
 
         last_obs, reward, done, info = env.step(action)
         print 'timestep', t
 
-        for key in info:
-            print 'key', key
-            print 'val for key ', key, 'is', info[key]
+        # for key in info:
+        #     print 'key', key
+        #     print 'val for key ', key, 'is', info[key]
         if done:
             print 'Done is True'
             env._close()
