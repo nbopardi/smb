@@ -17,14 +17,27 @@ env._configure(lock = multi_lock)
 # wrapper = control.SetPlayingMode('human')
 # env = wrapper(env)
 observation = env.reset()
+print np.count_nonzero(observation)
+# print observation
 print env.action_space.shape
 
 # print get_wrapper_by_name(env, "Monitor").get_total_steps()
-for _ in xrange(5):
+for i in xrange(1000):
 	action = env.action_space.sample()
-	print action
+	# print action
 	# time.sleep(1)
 	obs, rew, done, info = env.step(action)
+	# print obs
+	# print 'THE ARRAY IS ', np.count_nonzero(obs)
+	if np.array_equal(obs,np.zeros(shape=(224, 256, 3), dtype=np.uint8)):
+		print 'EMPTY SCREEN ARRAY'
+	if np.array_equal(observation,obs):
+		print 'obs are the same'
+	else:
+		print 'obs are NOT the same'
+
+	observation = obs
+	# time.sleep(5)
 	if done:
 		break
 	# env.render()

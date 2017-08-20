@@ -97,9 +97,13 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
         saver = tf.train.import_meta_graph(graph_name)
         saver.restore(sess, tf.train.latest_checkpoint('./'))
         meta_graph = tf.get_default_graph()
+        # print graph_name
+        print meta_graph
 
-        # for op in meta_graph.get_operations():
-        #     print str(op.name)
+        for op in meta_graph.get_operations():
+            print str(op.name)
+        
+        assert meta_graph is int 
         if len(env.observation_space.shape) == 1:
             # This means we are running on low-dimensional observations (e.g. RAM)
             input_shape = env.observation_space.shape
@@ -128,6 +132,8 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
         obs_tp1_float = tf.cast(obs_tp1_ph, tf.float32) / 255.0
         
         current_qfunc = meta_graph.get_tensor_by_name('current_qfunc/current_q_func_op:0')
+        output_layer = meta_graph.get_tensor_by_name('current_qfunc/q_func/action_value/fully_connected_1/BiasAdd:0')
+
         # current_qfunc = meta_graph.get_tensor_by_name("current_qfunc:0")
         # current_qfunc = q_func(obs_t_float, num_actions, scope = "q_func", reuse = False)
         # action_predict = tf.argmax(current_qfunc, axis = 1)
@@ -140,6 +146,8 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
 
         # tf.global_variables_initializer()
         last_obs = env.reset()
+        previous_obs = last_obs # test to see if observations are changing
+        # previous_state = np.array(0) # test to see if emulator is returning different states (observations)
         replay_buffer = ReplayBuffer(replay_buffer_size, frame_history_len)
 
         done = False
@@ -153,32 +161,86 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
         repeat_action_timer = 0
         last_action = 0
         while not done:
-
+            # time.sleep(10)
             obs_idx = replay_buffer.store_frame(last_obs)
             replay_obs = replay_buffer.encode_recent_observation()
             # print replay_obs.shape
             replay_obs = replay_obs.reshape(1,replay_obs.shape[0],replay_obs.shape[1],replay_obs.shape[2])
             # print replay_obs.shape
             # action = predict_action(replay_obs)
-            if random_action_counter < 3:
+            if random_action_counter < 5:
                 action = env.action_space.sample()
+                last_action = action
                 print action
                 last_obs, reward, done, info = env.step(action)
+                
+                if np.array_equal(previous_obs,last_obs):
+                    print 'obs are the same'
+                else:
+                    print 'obs not the same'
+                # if np.array_equal(previous_state,temp_state):
+                #     print 'states are the same'
+                # else:
+                #     print 'states are not the same'
+                # time.sleep(5)
+                previous_obs = last_obs
+                # previous_state = temp_state
+                random_action_counter += 1
 
             else:
                 if repeat_action_timer >= 8:
-
+                    # time.sleep(5)
                     repeat_action_timer = 0
                     action = sess.run([action_predict], feed_dict = {obs_t_ph: replay_obs})[0]
+                    print sess.run(output_layer, feed_dict = {obs_t_ph: replay_obs})
+                    # print output
                     last_action = action
+
+
+
+                    print 'NEW ACTION'
+                    print action
+                    if not isinstance(action,int):
+                        last_obs, reward, done, info = env.step(action[0])
+                        if np.array_equal(previous_obs,last_obs):
+                            print 'obs are the same'
+                        else:
+                            print 'obs not the same'
+                        # if np.array_equal(previous_state,temp_state):
+                        #     print 'states are the same'
+                        # else:
+                        #     print 'states are not the same'
+                        previous_obs = last_obs
+                        # previous_state = temp_state
+                    else:
+                        last_obs, reward, done, info = env.step(action)
+                        if np.array_equal(previous_obs,last_obs):
+                            print 'obs are the same'
+                        else:
+                            print 'obs not the same'
+                        # if np.array_equal(previous_state,temp_state):
+                        #     print 'states are the same'
+                        # else:
+                        #     print 'states are not the same'
+                        previous_obs = last_obs
+                        # previous_state = temp_state
+                    # time.sleep(5)
                 else:
 
                     repeat_action_timer += 1
                     action = last_action
-                
-                print action
-                last_obs, reward, done, info = env.step(action[0])
-            
+                    print action
+                    if not isinstance(action,int):
+                        last_obs, reward, done, info = env.step(action[0])
+                    else:
+                        last_obs, reward, done, info = env.step(action)
+                    previous_obs = last_obs
+                    # if np.array_equal(previous_state,temp_state):
+                    #     print 'states are the same'
+                    # else:
+                    #     print 'states are not the same'
+                    #     previous_state = temp_state
+
             # time.sleep(0.03)
             # rgb = env.render('rgb_array')
             # upscaled=repeat_upsample(rgb,4, 4)
@@ -223,7 +285,7 @@ def main():
     tf.reset_default_graph()
 
     # smb_learn(env, session, num_timesteps=9999999)
-    test_model('SMB_model-28', env)
+    test_model('SMB_model-112', env)
 
 if __name__ == "__main__":
     main()
