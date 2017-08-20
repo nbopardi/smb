@@ -21,7 +21,7 @@ from collections import namedtuple
 
 from dqn_utils import *
 # from atari_wrappers import *
-from gym.envs.classic_control import rendering
+# from gym.envs.classic_control import rendering
 
 # def atari_model(img_in, num_actions, scope, reuse=False):
 #     # as described in https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
