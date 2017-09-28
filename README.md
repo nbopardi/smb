@@ -1,4 +1,4 @@
-# smb
+# Deep Reinforcement Learning with Super Mario Bros. 1-1
 Implementing Google's Double DQN and Experience Replay Buffer for training an agent to beat Super Mario Bros 1-1.
 
 The environment to train and run Super Mario Bros. was built by ppaquette (https://github.com/ppaquette/gym-super-mario).
