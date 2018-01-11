@@ -100,10 +100,10 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
         # print graph_name
         print meta_graph
 
-        for op in meta_graph.get_operations():
-            print str(op.name)
+        # for op in meta_graph.get_operations():
+        #     print str(op.name)
         
-        assert meta_graph is int 
+        # assert meta_graph is int 
         if len(env.observation_space.shape) == 1:
             # This means we are running on low-dimensional observations (e.g. RAM)
             input_shape = env.observation_space.shape
@@ -160,6 +160,9 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
         random_action_counter = 0
         repeat_action_timer = 0
         last_action = 0
+        last_distance = 0
+        stuck = False
+        
         while not done:
             # time.sleep(10)
             obs_idx = replay_buffer.store_frame(last_obs)
@@ -168,16 +171,21 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
             replay_obs = replay_obs.reshape(1,replay_obs.shape[0],replay_obs.shape[1],replay_obs.shape[2])
             # print replay_obs.shape
             # action = predict_action(replay_obs)
-            if random_action_counter < 5:
-                action = env.action_space.sample()
+            if random_action_counter < 0 or stuck:
+                if stuck:
+                    stuck = False
+                    # action = 8
+                    action = env.action_space.sample()
+                else:
+                    action = env.action_space.sample()
                 last_action = action
-                print action
+                # print action
                 last_obs, reward, done, info = env.step(action)
                 
-                if np.array_equal(previous_obs,last_obs):
-                    print 'obs are the same'
-                else:
-                    print 'obs not the same'
+                # if np.array_equal(previous_obs,last_obs):
+                #     print 'obs are the same'
+                # else:
+                #     print 'obs not the same'
                 # if np.array_equal(previous_state,temp_state):
                 #     print 'states are the same'
                 # else:
@@ -188,24 +196,24 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
                 random_action_counter += 1
 
             else:
-                if repeat_action_timer >= 8:
+                if repeat_action_timer >= 0:
                     # time.sleep(5)
                     repeat_action_timer = 0
                     action = sess.run([action_predict], feed_dict = {obs_t_ph: replay_obs})[0]
-                    print sess.run(output_layer, feed_dict = {obs_t_ph: replay_obs})
+                    # print sess.run(output_layer, feed_dict = {obs_t_ph: replay_obs})
                     # print output
                     last_action = action
 
 
 
-                    print 'NEW ACTION'
-                    print action
+                    # print 'NEW ACTION'
+                    # print action
                     if not isinstance(action,int):
                         last_obs, reward, done, info = env.step(action[0])
-                        if np.array_equal(previous_obs,last_obs):
-                            print 'obs are the same'
-                        else:
-                            print 'obs not the same'
+                        # if np.array_equal(previous_obs,last_obs):
+                        #     print 'obs are the same'
+                        # else:
+                        #     print 'obs not the same'
                         # if np.array_equal(previous_state,temp_state):
                         #     print 'states are the same'
                         # else:
@@ -214,10 +222,10 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
                         # previous_state = temp_state
                     else:
                         last_obs, reward, done, info = env.step(action)
-                        if np.array_equal(previous_obs,last_obs):
-                            print 'obs are the same'
-                        else:
-                            print 'obs not the same'
+                        # if np.array_equal(previous_obs,last_obs):
+                        #     print 'obs are the same'
+                        # else:
+                        #     print 'obs not the same'
                         # if np.array_equal(previous_state,temp_state):
                         #     print 'states are the same'
                         # else:
@@ -229,7 +237,7 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
 
                     repeat_action_timer += 1
                     action = last_action
-                    print action
+                    # print action
                     if not isinstance(action,int):
                         last_obs, reward, done, info = env.step(action[0])
                     else:
@@ -240,17 +248,24 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
                     # else:
                     #     print 'states are not the same'
                     #     previous_state = temp_state
-
+                
             # time.sleep(0.03)
             # rgb = env.render('rgb_array')
             # upscaled=repeat_upsample(rgb,4, 4)
             # viewer.imshow(upscaled)
 
+            if iteration % 25 == 0: # distance check to make sure mario has moved
+
+                curr_distance = info['distance']
+                if curr_distance == last_distance:
+                    stuck = True # easy way to make mario take another action on the next timestep since he got stuck
+                    print 'STUCK CODE RUN'
+                last_distance = curr_distance
             replay_buffer.store_effect(obs_idx, action, reward, done)
 
-            for key in info:
-                print 'key', key
-                print 'val for key ', key, 'is', info[key]
+            # for key in info:
+            #     print 'key', key
+            #     print 'val for key ', key, 'is', info[key]
             
 
             episode_rewards = get_wrapper_by_name(env, "Monitor").get_episode_rewards()
@@ -266,6 +281,7 @@ def test_model(model_name, env, replay_buffer_size = 100000, frame_history_len =
                 # print("exploration %f" % exploration.value(t))
                 # print("learning_rate %f" % optimizer_spec.lr_schedule.value(t))
                 sys.stdout.flush()
+                
 
             iteration += 1
 
@@ -285,7 +301,7 @@ def main():
     tf.reset_default_graph()
 
     # smb_learn(env, session, num_timesteps=9999999)
-    test_model('SMB_model-112', env)
+    test_model('SMB_model-241', env)
 
 if __name__ == "__main__":
     main()
