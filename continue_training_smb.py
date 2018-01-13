@@ -151,6 +151,25 @@ def cont_train_model(model_name,
         
         current_qfunc = meta_graph.get_tensor_by_name('current_qfunc/current_q_func_op:0')
         output_layer = meta_graph.get_tensor_by_name('current_qfunc/q_func/action_value/fully_connected_1/BiasAdd:0')
+        # conv2_layer = meta_graph.get_tensor_by_name('current_qfunc/q_func/convnet/Conv_2/Relu:0')
+
+        # conv2_flatten = meta_graph.get_tensor_by_name('current_qfunc/q_func/Flatten/Reshape:0')
+
+        # test_flat = layers.flatten(conv2_layer)
+        # print test_flat
+        # print conv2_flatten
+        # print conv2_layer
+        # print test_flat == conv2_flatten
+
+        # output = temp_layer = layers.convolution2d(conv2_layer, num_outputs=64, kernel_size=3, stride=1, activation_fn=tf.nn.relu)
+        # flat = layers.flatten(output)
+        # output = layers.fully_connected(flat, num_outputs=512,         activation_fn=tf.nn.relu)
+        # output = layers.fully_connected(output, num_outputs= num_actions, activation_fn=None)
+        # print output
+
+        # print 'worked'
+
+        # assert num_actions is int
 
         q_target = meta_graph.get_tensor_by_name('StopGradient_1:0')
         total_error = meta_graph.get_tensor_by_name('Mean:0')
