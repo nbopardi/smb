@@ -4,6 +4,8 @@ Implementing Google's Double DQN and Experience Replay Buffer for training an ag
 The environment to train and run Super Mario Bros. was built by ppaquette (https://github.com/ppaquette/gym-super-mario).
 Make sure to have FCEUX 2.2.3 installed with a valid rom of Super Mario Bros.
 
+The data file for the model needs to be downloaded from here (450 mb download): https://drive.google.com/file/d/1n8WrJuhbtbCQ7M3L6FXFEmWMmfKKKZIK/view?usp=sharing. Place the data file in the same folder as the index and meta files.
+
 To run the project, run the test_dqn_smb.py script.
 
 Double DQN: https://arxiv.org/pdf/1509.06461.pdf
