@@ -1,5 +1,6 @@
 # run_dqn_smb.py
-
+# This is the script that was used to initially set up the training process for the model up until iteration 112. Training was continued with some slight modifications
+# (see continue_training_smb.py for the latest training script)
 import argparse
 import gym
 from gym import wrappers
@@ -9,18 +10,16 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
 import multiprocessing
-
 import dqn
 import action_space
 import control
-# from action_space import *
-# from control import *
-
 
 from dqn_utils import *
-# from atari_wrappers import *
 
-
+# The model for the q function. The layers include 3 convolutional layers of 32, 64, and 64 ReLU neurons, and two fully connected layers of 512 and 10 ReLU neurons.
+# Parameter - img_in - the raw image that is fed into the net
+# Parameter - num_actions - the number of possible actions for the agent
+# Parameter - reuse - boolean to determine if the weights should be reused in the same scope 
 def smb_model(img_in, num_actions, scope, reuse=False):
     # as described in https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
     with tf.variable_scope(scope, reuse=reuse):
@@ -36,7 +35,10 @@ def smb_model(img_in, num_actions, scope, reuse=False):
             out = layers.fully_connected(out, num_outputs=num_actions, activation_fn=None)
 
         return out
-
+# The preprocessing of information before DQN can be run
+# Parameter - env - the gym environment
+# Parameter - session - the current tensorflow session
+# Parameter - num_timesteps - the max number of timesteps the algorithm can run for during training
 def smb_learn(env,
                 session,
                 num_timesteps):
@@ -87,11 +89,13 @@ def smb_learn(env,
     )
     env.close()
 
+# Acquire all available gpus from the local device
 def get_available_gpus():
     from tensorflow.python.client import device_lib
     local_device_protos = device_lib.list_local_devices()
     return [x.physical_device_desc for x in local_device_protos if x.device_type == 'GPU']
 
+# Sets global random seeds
 def set_global_seeds(i):
     try:
         import tensorflow as tf
@@ -102,6 +106,7 @@ def set_global_seeds(i):
     np.random.seed(i)
     random.seed(i)
 
+# Gets the current session
 def get_session():
     tf.reset_default_graph()
     tf_config = tf.ConfigProto(
@@ -111,6 +116,9 @@ def get_session():
     print("AVAILABLE GPUS: ", get_available_gpus())
     return session
 
+# Gets the gym environment
+# Parameter: task - the gym environment id to load
+# Parameter: seed – the environment seed to be set
 def get_env(task, seed):
     env_id = task
 
@@ -128,18 +136,14 @@ def get_env(task, seed):
     
     return env
 
+# Main that gets the environment and the session before training begins
 def main():
-    # Get Atari games.
-    # benchmark = gym.benchmark_spec('Atari40M')
 
-    # Change the index to select a different game.
-    # task = benchmark.tasks[3]
-    task = 'SuperMarioBros-1-1-v0'
-    # Run training
-    seed = 0 # Use a seed of zero (you may want to randomize the seed!)
+    task = 'SuperMarioBros-1-1-v0'  # The environment to load
+    seed = 0                        # Arbitrarily chose a seed of 0
     env = get_env(task, seed)
-    # print type(env.action_space)
     session = get_session()
+
     smb_learn(env, session, num_timesteps=9999999)
 
 if __name__ == "__main__":
