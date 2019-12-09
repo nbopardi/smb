@@ -14,6 +14,6 @@ Prioritized Experienced Replay: https://arxiv.org/pdf/1511.05952.pdf
 
 Part of this project was based off of  Berkeley's CS 294-112 Deep Reinforcement Learning Homework 3 for Atari Games: https://github.com/berkeleydeeprlcourse/homework/tree/master/hw3
 
-Video of the agent completing Super Mario Bros. 1-1: https://youtu.be/6DCH33V2ILo
+Video of the agent completing Super Mario Bros. 1-1: https://drive.google.com/file/d/1hGIL3sNw5bDJLnlBjqzdLfCRHt5KP1fd/view?usp=sharing
 
 If you have any questions, please feel free to contact me.
